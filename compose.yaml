@@ -1,0 +1,109 @@
+name: ordenes
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: ordenes-db
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+    volumes:
+      - mssql_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q \"SELECT 1\" || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    networks: [ordenes-net]
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+    restart: unless-stopped
+
+  # Servicio de inicializacion: ejecuta db/init.sql (idempotente) y termina
+  db-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: ordenes-db-init
+    environment:
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+    volumes:
+      - ./db/init.sql:/init.sql:ro
+    entrypoint: ["/bin/bash", "-c"]
+    command: ["/opt/mssql-tools18/bin/sqlcmd -C -b -S db -U sa -P \"$$MSSQL_SA_PASSWORD\" -i /init.sql"]
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [ordenes-net]
+    restart: "no"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
+
+  api:
+    build: ./api
+    image: ${DOCKERHUB_USER:-usuario}/ordenes-api:${IMAGE_TAG:-v1.0}
+    container_name: ordenes-api
+    environment:
+      DB_HOST: db
+      DB_PORT: "1433"
+      DB_USER: sa
+      DB_PASSWORD: ${MSSQL_SA_PASSWORD}
+      DB_NAME: ${DB_NAME:-OrdenesDB}
+    ports:
+      - "5002:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+      db-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+    networks: [ordenes-net]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M
+    restart: unless-stopped
+
+  web:
+    build: ./web
+    image: ${DOCKERHUB_USER:-usuario}/ordenes-web:${IMAGE_TAG:-v1.0}
+    container_name: ordenes-web
+    environment:
+      API_URL: http://api:5000
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-dev-key}
+    ports:
+      - "8000:8000"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+    networks: [ordenes-net]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M
+    restart: unless-stopped
+
+networks:
+  ordenes-net:
+    driver: bridge
+
+volumes:
+  mssql_data:

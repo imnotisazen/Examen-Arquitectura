@@ -1,0 +1,28 @@
+{% extends "ordenes/base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between mb-3">
+  <h1 class="h3">Ordenes</h1>
+  <a class="btn btn-primary" href="{% url 'orden_nueva' %}">Nueva orden</a>
+</div>
+<table class="table table-striped bg-white">
+  <thead><tr><th>#</th><th>Cliente</th><th>Fecha</th><th>Estado</th><th class="text-end">Total (L)</th><th></th></tr></thead>
+  <tbody>
+  {% for o in ordenes %}
+    <tr>
+      <td>{{ o.id }}</td><td>{{ o.cliente }}</td><td>{{ o.fecha }}</td>
+      <td><span class="badge bg-{% if o.estado == 'Pagada' %}success{% elif o.estado == 'Anulada' %}secondary{% else %}warning text-dark{% endif %}">{{ o.estado }}</span></td>
+      <td class="text-end">{{ o.total|floatformat:2 }}</td>
+      <td class="text-end">
+        <a class="btn btn-sm btn-outline-primary" href="{% url 'orden_ver' o.id %}">Ver</a>
+        <a class="btn btn-sm btn-outline-secondary" href="{% url 'orden_editar' o.id %}">Editar</a>
+        <form method="post" action="{% url 'orden_eliminar' o.id %}" class="d-inline" onsubmit="return confirm('Eliminar la orden {{ o.id }} y sus detalles?')">
+          {% csrf_token %}<button class="btn btn-sm btn-outline-danger">Eliminar</button>
+        </form>
+      </td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="6" class="text-center text-muted">No hay ordenes.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

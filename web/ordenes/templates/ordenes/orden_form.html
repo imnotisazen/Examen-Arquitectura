@@ -1,0 +1,17 @@
+{% extends "ordenes/base.html" %}
+{% block content %}
+<h1 class="h4">{% if editando %}Editar orden #{{ orden.id }}{% else %}Nueva orden{% endif %}</h1>
+<form method="post" class="card card-body" style="max-width:520px">
+  {% csrf_token %}
+  <label class="form-label">Cliente</label>
+  <input class="form-control mb-3" name="cliente" value="{{ orden.cliente|default:'' }}" required>
+  <label class="form-label">Fecha</label>
+  <input class="form-control mb-3" type="date" name="fecha" value="{{ orden.fecha|default:'' }}">
+  <label class="form-label">Estado</label>
+  <select class="form-select mb-3" name="estado">
+    {% for e in estados %}<option value="{{ e }}" {% if orden.estado == e %}selected{% endif %}>{{ e }}</option>{% endfor %}
+  </select>
+  <div><button class="btn btn-primary">Guardar</button>
+  <a class="btn btn-link" href="{% if editando %}{% url 'orden_ver' orden.id %}{% else %}{% url 'lista' %}{% endif %}">Cancelar</a></div>
+</form>
+{% endblock %}
