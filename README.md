@@ -117,7 +117,7 @@ Editar `.env` con una contraseña propia para SQL Server:
 
 | Variable | Descripción | Ejemplo |
 | --- | --- | --- |
-| `MSSQL_SA_PASSWORD` | Contraseña del usuario `sa`; debe cumplir la política de SQL Server | `MiPasswordSeguro2026*` |
+| `MSSQL_SA_PASSWORD` | Contraseña del usuario `sa`; debe cumplir la política de SQL Server | `CambiaEstaClave2026*` |
 | `DB_NAME` | Nombre de la base de datos | `OrdenesDB` |
 | `DOCKERHUB_USER` | Usuario de Docker Hub usado en las etiquetas de las imágenes | `ruth2005` |
 | `IMAGE_TAG` | Etiqueta de versión de las imágenes | `v1.0` |
