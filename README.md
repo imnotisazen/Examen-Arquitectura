@@ -136,6 +136,8 @@ docker compose up -d --build
 docker compose ps
 ```
 
+En PowerShell, el equivalente de `cp` es `Copy-Item .env.example .env`.
+
 La primera ejecución tarda algunos minutos porque descarga la imagen de SQL Server, construye las imágenes de `api` y `web` e inicializa la base de datos. Cuando `docker compose ps` muestre `db`, `api` y `web` en estado `healthy`, el sistema está listo.
 
 Para detener los servicios:
