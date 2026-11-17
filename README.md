@@ -5,8 +5,8 @@ Examen practico 2P - Arquitectura de Computadoras. Django (web) + Flask (api) + 
 ## Integrantes
 | Nombre completo | Numero de cuenta |
 |---|---|
-| (completar) | (completar) |
-| (completar) | (completar) |
+| RUTH LIZETH PALACIOS ORDOÑEZ | 202410110195 |
+
 
 ## Arquitectura
 ```
@@ -19,14 +19,14 @@ Navegador --:8000--> web (Django) --http://api:5000--> api (Flask) --db:1433--> 
 |---|---|---|---|
 | db | mcr.microsoft.com/mssql/server:2022-latest | (interno 1433) | 2 CPU / 2 GB |
 | db-init | misma imagen, ejecuta `db/init.sql` y termina | - | 0.25 CPU / 128 MB |
-| api | `<usuario>/ordenes-api:v1.0` | 5000 | 0.5 CPU / 256 MB |
-| web | `<usuario>/ordenes-web:v1.0` | 8000 | 0.5 CPU / 256 MB |
+| api | `ruth2005/ordenes-api:v1.0` | 5002 | 0.5 CPU / 256 MB |
+| web | `ruth2005/ordenes-web:v1.0` | 8000 | 0.5 CPU / 256 MB |
 
 `api` y `web` corren con usuario sin privilegios (`appuser`). Solo `api` se conecta a la base de datos.
 
 ## Ejecutar desde cero
 ```bash
-git clone <URL-DEL-REPO> && cd ordenes-docker
+git clone [https://github.com/palaciosruth52-alt/Examen-Arquitectura.git](https://github.com/palaciosruth52-alt/Examen-Arquitectura.git) && cd Examen-Arquitectura 
 cp .env.example .env        # editar MSSQL_SA_PASSWORD y DOCKERHUB_USER
 docker compose up -d --build
 docker compose ps            # esperar a que db, api y web esten "healthy"
