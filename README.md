@@ -329,14 +329,3 @@ docker compose push api web
 ![docker stats](evidencias/docker-stats.png)
 
 Las capturas de terminal muestran la salida real de los comandos ejecutados con Docker Desktop en Windows; las capturas de la interfaz se tomaron sobre la aplicación levantada con `docker compose up -d --build`.
-
-## Solución de problemas
-
-| Síntoma | Causa probable | Solución |
-| --- | --- | --- |
-| `db` no llega a `healthy` | Contraseña débil o volumen creado con otra contraseña | Revisar `MSSQL_SA_PASSWORD`; en un entorno de pruebas, `docker compose down -v` y volver a levantar |
-| `db-init` termina con error | `sqlcmd` no disponible o script con error | Revisar `docker compose logs db-init` |
-| `api` no arranca | `db` o `db-init` no terminaron correctamente | Revisar `docker compose ps` y los logs de `api` |
-| La web muestra un error de conexión | API detenida o `API_URL` incorrecta | Verificar que `API_URL=http://api:5000` y que `api` esté `healthy` |
-| Conflicto de puertos | Otro proceso usa `8000` o `5002` | Detener el otro proceso o cambiar los puertos en `compose.yaml` |
-| La interfaz se ve sin estilos | Bootstrap se carga desde un CDN y no hay internet | Conectar el equipo a internet para la revisión |
