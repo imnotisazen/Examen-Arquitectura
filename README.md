@@ -83,13 +83,18 @@ Examen-Arquitectura/
 │   └── .dockerignore
 └── evidencias/
     ├── compose-ps.png
-    ├── pruebas-api.png
     ├── lista-ordenes.png
     ├── nueva-orden.png
     ├── orden-creada.png
     ├── nuevo-detalle.png
     ├── detalle-agregado.png
     ├── lista-actualizada.png
+    ├── editar-orden.png
+    ├── orden-actualizada.png
+    ├── eliminar-orden.png
+    ├── pruebas-api.png
+    ├── pruebas-curl.png
+    ├── persistencia.png
     └── docker-stats.png
 ```
 
@@ -170,7 +175,7 @@ Todas las respuestas son JSON. El total de la orden se recalcula automáticament
 
 `db/init.sql` crea la base `OrdenesDB`, las tablas `ordenes` y `orden_detalle` (con llave foránea `ON DELETE CASCADE`), y carga cinco órdenes de prueba con dos o tres detalles cada una. El script es idempotente: puede ejecutarse varias veces sin duplicar información.
 
-El servicio `db-init` ejecuta el script con `sqlcmd` cuando `db` está sano y termina. La API espera a que `db` esté `healthy` y a que `db-init` finalice correctamente (`service_completed_successfully`) antes de arrancar.
+El servicio `db-init` ejecuta el script con `sqlcmd` cuando `db` está sano y termina. La API espera a que `db` esté `healthy` y a que `db-init` finalice correctamente (`service_completed_successfully`) antes de arrancar. Si SQL Server todavía no está listo al reiniciar con el volumen ya creado, `db-init` reintenta hasta 20 veces (cada 5 segundos) antes de reportar un error.
 
 Para revisar el resultado:
 
@@ -293,13 +298,35 @@ docker compose push api web
 
 ![Listado actualizado](evidencias/lista-actualizada.png)
 
-**Respuesta JSON de la API:**
+**Formulario de edición de una orden:**
+
+![Editar orden](evidencias/editar-orden.png)
+
+**Orden actualizada, con mensaje de confirmación:**
+
+![Orden actualizada](evidencias/orden-actualizada.png)
+
+**Orden eliminada, con mensaje de confirmación:**
+
+![Eliminar orden](evidencias/eliminar-orden.png)
+
+**Respuesta JSON de la API desde el navegador:**
 
 ![Pruebas de la API](evidencias/pruebas-api.png)
+
+**Pruebas de la API con `curl`: códigos 200, 201, 400 y 404, y recálculo del total:**
+
+![Pruebas con curl](evidencias/pruebas-curl.png)
+
+**Persistencia de los datos después de `docker compose down` y `docker compose up -d`:**
+
+![Persistencia de datos](evidencias/persistencia.png)
 
 **Consumo y límites de CPU y memoria** (`docker stats`):
 
 ![docker stats](evidencias/docker-stats.png)
+
+Las capturas de terminal muestran la salida real de los comandos ejecutados con Docker Desktop en Windows; las capturas de la interfaz se tomaron sobre la aplicación levantada con `docker compose up -d --build`.
 
 ## Solución de problemas
 

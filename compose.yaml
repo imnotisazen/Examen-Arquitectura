@@ -32,7 +32,20 @@ services:
     volumes:
       - ./db/init.sql:/init.sql:ro
     entrypoint: ["/bin/bash", "-c"]
-    command: ["/opt/mssql-tools18/bin/sqlcmd -C -b -S db -U sa -P \"$$MSSQL_SA_PASSWORD\" -i /init.sql"]
+    # Reintenta la inicializacion: al reiniciar con el volumen ya creado, SQL Server
+    # puede tardar unos segundos mas en dejar lista la base OrdenesDB.
+    command:
+      - |
+        for i in {1..20}; do
+          if /opt/mssql-tools18/bin/sqlcmd -C -b -S db -U sa -P "$$MSSQL_SA_PASSWORD" -i /init.sql; then
+            echo "Base de datos inicializada correctamente.";
+            exit 0;
+          fi
+          echo "SQL Server aun no esta listo, reintentando en 5 segundos...";
+          sleep 5;
+        done;
+        echo "No se pudo inicializar la base de datos.";
+        exit 1
     depends_on:
       db:
         condition: service_healthy
